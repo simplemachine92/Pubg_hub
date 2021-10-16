@@ -1,5 +1,7 @@
 # Retroactive-Funding Starter Kit
 
+<img src= "https://ipfs.io/ipfs/QmYPfVtNZUPbj2PNvDVCskgR7DBn8SQZbUvaqsoYL2Tiut" width="250">
+
 ### Merkles
 Generate list of token holders of existing projects (enter contract address), create merkle root with amount values, upload to ipfs
 
