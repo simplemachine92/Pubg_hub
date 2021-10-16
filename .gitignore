@@ -13,6 +13,7 @@ packages/react-app/src/contracts/*
 !packages/react-app/src/contracts/external_contracts.js
 packages/hardhat/cache*
 packages/**/data
+packages/hardhat/mnemonic.txt
 !packages/react-app/src/contracts/contracts.js
 
 
@@ -20,6 +21,7 @@ packages/**/data
 packages/hardhat-ts/cache
 # secrets
 .secret
+packages/hardhat/0xb64c68b928e23c3e16c91fd5289af572e7ac5316.txt
 
 packages/subgraph/config/config.json
 tenderly.yaml

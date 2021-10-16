@@ -1,7 +1,7 @@
 import WalletConnectProvider from "@walletconnect/web3-provider";
 //import Torus from "@toruslabs/torus-embed"
 import WalletLink from "walletlink";
-import { Alert, Button, Col, Menu, Row } from "antd";
+import { Alert, Button, Col, Input, Menu, Row, Image } from "antd";
 import "antd/dist/antd.css";
 import React, { useCallback, useEffect, useState } from "react";
 import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
@@ -175,6 +175,8 @@ function App(props) {
 
   const [injectedProvider, setInjectedProvider] = useState();
   const [address, setAddress] = useState();
+  const [userQuery, setUserQuery] = useState();
+  const [sending, setSending] = useState();
 
   const logoutOfWeb3Modal = async () => {
     await web3Modal.clearCachedProvider();
@@ -462,6 +464,16 @@ function App(props) {
               YourContract
             </Link>
           </Menu.Item>
+          <Menu.Item key="/MakeARoot">
+            <Link
+              onClick={() => {
+                setRoute("/MakeARoot");
+              }}
+              to="/MakeARoot"
+            >
+              MakeARoot
+            </Link>
+          </Menu.Item>
           <Menu.Item key="/hints">
             <Link
               onClick={() => {
@@ -528,6 +540,45 @@ function App(props) {
               mainnetProvider={mainnetProvider}
               price={price}
             />
+          </Route>
+          <Route path="/MakeARoot">
+            <div style={{ paddingTop: 32, width: 740, margin: "auto" }}>
+            <Image
+      width={200}
+      src="https://ipfs.io/ipfs/QmYPfVtNZUPbj2PNvDVCskgR7DBn8SQZbUvaqsoYL2Tiut"
+    />
+              <Input
+                value={userQuery}
+                placeHolder="Enter Project Token or NFT Token Address"
+                onChange={e => {
+                  setUserQuery(e.target.value);
+                }}
+              />
+            </div>
+            <Button
+              style={{ margin: 8 }}
+              loading={sending}
+              size="large"
+              shape="round"
+              type="primary"
+              onClick={async () => {
+                //chain_id = 1 for ETH, 137 for Polygon/Matic, 43114 for Binance
+                // Grabs list of all holders of token / nft, so we can append a value, 
+                // and make a merkle json for IPFS    
+                const result = await fetch(`https://api.covalenthq.com/v1/1/tokens/${userQuery}/token_holders/?page-size=1000&?key=ckey_9c1c5e29a5d14eedadefde23ec5`, {
+                })
+                .then(response => response.json())
+                //take data and organize in CSV with Holders -> amounts or token number
+                //Amounts will be preset buttons, placed in CSV adjacent
+                .then(data => console.log(data));
+              }
+          }
+
+            >
+              Submit
+            </Button>
+
+            <pre style={{ padding: 16, width: 500, margin: "auto", paddingBottom: 150 }}></pre>
           </Route>
           <Route path="/exampleui">
             <ExampleUI
