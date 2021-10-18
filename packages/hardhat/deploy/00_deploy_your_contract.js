@@ -1,6 +1,6 @@
 // deploy/00_deploy_your_contract.js
 
-//const { ethers } = require("hardhat");
+// const { ethers } = require("hardhat");
 
 module.exports = async ({ getNamedAccounts, deployments }) => {
   const { deploy } = deployments;
@@ -15,7 +15,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
   await deploy("Airdropper", {
     from: deployer,
-    args: ["0x5fbdb2315678afecb367f032d93f642f64180aa3"],
+    args: [],
     log: true,
   });
 
