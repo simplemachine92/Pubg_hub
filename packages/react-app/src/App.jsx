@@ -464,6 +464,16 @@ function App(props) {
               YourContract
             </Link>
           </Menu.Item>
+          <Menu.Item key="/airdrop">
+            <Link
+              onClick={() => {
+                setRoute("/airdrop");
+              }}
+              to="/airdrop"
+            >
+              Airdrop
+            </Link>
+          </Menu.Item>
           <Menu.Item key="/MakeARoot">
             <Link
               onClick={() => {
@@ -525,7 +535,18 @@ function App(props) {
             */}
 
             <Contract
-              name="YourContract"
+              name="SimpleNFT"
+              signer={userSigner}
+              provider={localProvider}
+              address={address}
+              blockExplorer={blockExplorer}
+              contractConfig={contractConfig}
+            />
+          </Route>
+          <Route exact path="/airdrop">
+            <h1>Airdrop</h1>
+            <Contract
+              name="Airdropper"
               signer={userSigner}
               provider={localProvider}
               address={address}
@@ -543,10 +564,7 @@ function App(props) {
           </Route>
           <Route path="/MakeARoot">
             <div style={{ paddingTop: 32, width: 740, margin: "auto" }}>
-            <Image
-      width={200}
-      src="https://ipfs.io/ipfs/QmYPfVtNZUPbj2PNvDVCskgR7DBn8SQZbUvaqsoYL2Tiut"
-    />
+              <Image width={200} src="https://ipfs.io/ipfs/QmYPfVtNZUPbj2PNvDVCskgR7DBn8SQZbUvaqsoYL2Tiut" />
               <Input
                 value={userQuery}
                 placeHolder="Enter Project Token or NFT Token Address"
@@ -563,17 +581,17 @@ function App(props) {
               type="primary"
               onClick={async () => {
                 //chain_id = 1 for ETH, 137 for Polygon/Matic, 43114 for Binance
-                // Grabs list of all holders of token / nft, so we can append a value, 
-                // and make a merkle json for IPFS    
-                const result = await fetch(`https://api.covalenthq.com/v1/1/tokens/${userQuery}/token_holders/?page-size=1000&?key=ckey_9c1c5e29a5d14eedadefde23ec5`, {
-                })
-                .then(response => response.json())
-                //take data and organize in CSV with Holders -> amounts or token number
-                //Amounts will be preset buttons, placed in CSV adjacent
-                .then(data => console.log(data));
-              }
-          }
-
+                // Grabs list of all holders of token / nft, so we can append a value,
+                // and make a merkle json for IPFS
+                const result = await fetch(
+                  `https://api.covalenthq.com/v1/1/tokens/${userQuery}/token_holders/?page-size=1000&?key=ckey_9c1c5e29a5d14eedadefde23ec5`,
+                  {},
+                )
+                  .then(response => response.json())
+                  //take data and organize in CSV with Holders -> amounts or token number
+                  //Amounts will be preset buttons, placed in CSV adjacent
+                  .then(data => console.log(data));
+              }}
             >
               Submit
             </Button>

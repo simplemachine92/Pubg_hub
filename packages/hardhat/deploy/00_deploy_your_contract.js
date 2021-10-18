@@ -5,10 +5,17 @@
 module.exports = async ({ getNamedAccounts, deployments }) => {
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
-  await deploy("YourContract", {
+  // await deploy("YourContract", { from: deployer, log: true });
+  await deploy("SimpleNFT", {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
     from: deployer,
-    //args: [ "_token", ethers.utils.parseEther("1.5") ],
+    // args: [ "_token", ethers.utils.parseEther("1.5") ],
+    log: true,
+  });
+
+  await deploy("Airdropper", {
+    from: deployer,
+    args: ["0x5fbdb2315678afecb367f032d93f642f64180aa3"],
     log: true,
   });
 
