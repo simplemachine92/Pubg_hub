@@ -165,6 +165,13 @@ const web3Modal = new Web3Modal({
   },
 });
 
+async function dothething(data) {
+  //data logging is working
+  //create CSV using user inputs in form of buttons for distribution amounts or token IDs
+  for (let x in data.data.items) {
+  console.log(data.data.items[x].address)
+  }}
+
 function App(props) {
   const mainnetProvider =
     poktMainnetProvider && poktMainnetProvider._isProvider
@@ -584,14 +591,21 @@ function App(props) {
                 // Grabs list of all holders of token / nft, so we can append a value,
                 // and make a merkle json for IPFS
                 const result = await fetch(
-                  `https://api.covalenthq.com/v1/1/tokens/${userQuery}/token_holders/?page-size=1000&?key=ckey_9c1c5e29a5d14eedadefde23ec5`,
-                  {},
+                  
+                  `https://api.covalenthq.com/v1/1/tokens/${userQuery}/token_holders/?page-size=2000&key=ckey_2c198a798bdc4553b499279fe87`,
                 )
                   .then(response => response.json())
                   //take data and organize in CSV with Holders -> amounts or token number
                   //Amounts will be preset buttons, placed in CSV adjacent
-                  .then(data => console.log(data));
-              }}
+                  .then(data => dothething(data)
+                  )
+                }
+              }
+                    
+                    /* {const transform = data
+                    for (let x in transform.length) {
+                      console.log(transform[x].address)}
+                    })}    }     */
             >
               Submit
             </Button>
