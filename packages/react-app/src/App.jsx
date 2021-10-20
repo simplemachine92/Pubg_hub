@@ -1,6 +1,7 @@
 import WalletConnectProvider from "@walletconnect/web3-provider";
 //import Torus from "@toruslabs/torus-embed"
 import WalletLink from "walletlink";
+import { CopyBlock, dracula } from "react-code-blocks";
 import { Alert, Button, Col, Input, Menu, Row, Image } from "antd";
 import "antd/dist/antd.css";
 import React, { useCallback, useEffect, useState } from "react";
@@ -32,6 +33,7 @@ import Portis from "@portis/web3";
 import Fortmatic from "fortmatic";
 import Authereum from "authereum";
 
+const ObjectsToCsv = require('objects-to-csv');
 const { ethers } = require("ethers");
 /*
     Welcome to 🏗 scaffold-eth !
@@ -165,13 +167,6 @@ const web3Modal = new Web3Modal({
   },
 });
 
-async function dothething(data) {
-  //data logging is working
-  //create CSV using user inputs in form of buttons for distribution amounts or token IDs
-  for (let x in data.data.items) {
-  console.log(data.data.items[x].address)
-  }}
-
 function App(props) {
   const mainnetProvider =
     poktMainnetProvider && poktMainnetProvider._isProvider
@@ -183,7 +178,36 @@ function App(props) {
   const [injectedProvider, setInjectedProvider] = useState();
   const [address, setAddress] = useState();
   const [userQuery, setUserQuery] = useState();
+  const [userValue, setUserValue] = useState();
   const [sending, setSending] = useState();
+  const [sheet, setSheet] = useState();
+
+  var newSheet = '';
+const csvArray = [];
+
+async function dothething(data, userValue) {
+  //data logging is working
+  //create CSV using user inputs in form of buttons for distribution amounts or token IDs
+  const csvArray = [];
+  for (let x in data.data.items) {
+  console.log(data.data.items[x].address)
+  var obj = {
+    address: (data.data.items[x].address),
+    value: (userValue)
+}
+csvArray.push(obj)
+console.log(csvArray)
+  }
+  makethesheet(csvArray)
+}
+
+  async function makethesheet(csvArray) {
+    const csv = new ObjectsToCsv(csvArray)
+    const theSheet = await csv.toString()
+    var newSheet = theSheet.split("\n").slice(1).join("\n")
+    console.log(newSheet)
+    setSheet(newSheet)
+  }
 
   const logoutOfWeb3Modal = async () => {
     await web3Modal.clearCachedProvider();
@@ -569,7 +593,7 @@ function App(props) {
               price={price}
             />
           </Route>
-          <Route path="/MakeARoot">
+          <Route path="/MakeARoot"> 
             <div style={{ paddingTop: 32, width: 740, margin: "auto" }}>
               <Image width={200} src="https://ipfs.io/ipfs/QmYPfVtNZUPbj2PNvDVCskgR7DBn8SQZbUvaqsoYL2Tiut" />
               <Input
@@ -577,6 +601,13 @@ function App(props) {
                 placeHolder="Enter Project Token or NFT Token Address"
                 onChange={e => {
                   setUserQuery(e.target.value);
+                }}
+              />
+              <Input
+                value={userValue}
+                placeHolder="Enter Value to mass send"
+                onChange={e => {
+                  setUserValue(e.target.value);
                 }}
               />
             </div>
@@ -597,7 +628,7 @@ function App(props) {
                   .then(response => response.json())
                   //take data and organize in CSV with Holders -> amounts or token number
                   //Amounts will be preset buttons, placed in CSV adjacent
-                  .then(data => dothething(data)
+                  .then(data => dothething(data, userValue)
                   )
                 }
               }
@@ -609,8 +640,15 @@ function App(props) {
             >
               Submit
             </Button>
-
-            <pre style={{ padding: 16, width: 500, margin: "auto", paddingBottom: 150 }}></pre>
+            <CopyBlock
+      text={sheet || 'Copy this list after submitting!'}
+      theme={dracula}
+      language='text'
+      //showLineNumbers={props.showLineNumbers}
+      //startingLineNumber={props.startingLineNumber}
+      //wrapLines
+      codeBlock
+    /> 
           </Route>
           <Route path="/exampleui">
             <ExampleUI

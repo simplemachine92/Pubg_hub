@@ -3,7 +3,7 @@
 */
 
 // SPDX-License-Identifier: MIT AND GPL-v3-or-later
-pragma solidity 0.8.1;
+pragma solidity 0.8.4;
 
 abstract contract Context {
     function _msgSender() internal view virtual returns (address) {
