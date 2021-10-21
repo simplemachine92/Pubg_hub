@@ -69,7 +69,7 @@ import {
       if (erc20Contract) {
         let newBalance = await erc20Contract.balanceOf(address);
         setBalance(newBalance);
-        let newAllowance = await erc20Contract.allowance(address, readContracts.MerkleDeployer.address);
+        let newAllowance = await erc20Contract.allowance(address, readContracts.ERC721.address);
         console.log(newAllowance, newBalance);
         setAllowance(newAllowance);
       } else {
@@ -131,10 +131,10 @@ import {
                 onChange={async e => {
                   if (ethers.utils.isAddress(e.target.value)) {
                     try {
-                      let newTokenContract = readContracts.ERC20.attach(e.target.value);
+                      let newTokenContract = readContracts.ERC721.attach(e.target.value);
                       let newDecimals = await newTokenContract.decimals();
                       let newSymbol = await newTokenContract.symbol();
-                      let newAllowance = await newTokenContract.allowance(address, readContracts.MerkleDeployer.address);
+                      let newAllowance = await newTokenContract.allowance(address, readContracts.YourContract.address);
                       let newBalance = await newTokenContract.balanceOf(address);
                       setTokenAddress(e.target.value);
                       setDecimals(newDecimals);
@@ -236,7 +236,7 @@ import {
           {assetType == "ETH" ? (
             <Button
               loading={deploying}
-              disabled={!amountRequired || Number(ethers.utils.formatEther(ethBalance)) < amountRequired}
+              //disabled={!amountRequired || Number(ethers.utils.formatEther(ethBalance)) < amountRequired}
               onClick={() => {
                 pinata
                   .pinJSONToIPFS(merkleJson)
@@ -247,7 +247,7 @@ import {
                     let merkleRoot = merkleTree.getHexRoot();
   
                     tx(
-                      writeContracts.MerkleDeployer.deployEthMerkler(merkleRoot, dropper, deadline, result.IpfsHash, {
+                      writeContracts.YourContract.deployEthMerkler(merkleRoot, dropper, deadline, result.IpfsHash, {
                         value: ethers.utils.parseEther(amountRequired.toString()),
                       }),
                     )
@@ -275,14 +275,14 @@ import {
           ) : ethers.utils.parseUnits(String(amountRequired || "0"), decimals) > allowance ? (
             <Button
               loading={deploying}
-              disabled={!allowance}
+              //disabled={!allowance}
               onClick={() => {
                 setDeploying(true);
                 try {
                   let signingContract = erc20Contract.connect(userSigner);
                   tx(
                     signingContract.approve(
-                      writeContracts.MerkleDeployer.address,
+                      writeContracts.YourContract.address,
                       ethers.utils.parseUnits(amountRequired.toString(), decimals),
                     ),
                   ).then(result => {
@@ -299,7 +299,7 @@ import {
           ) : (
             <Button
               loading={deploying}
-              disabled={!tokenAddress || !amountRequired || (allowance.toString() | "0") == "0"}
+              //disabled={!tokenAddress || !amountRequired || (allowance.toString() | "0") == "0"}
               onClick={() => {
                 setDeploying(true);
                 pinata
@@ -312,13 +312,13 @@ import {
                     let merkleRoot = merkleTree.getHexRoot();
   
                     tx(
-                      writeContracts.MerkleDeployer.deployTokenMerkler(
-                        merkleRoot,
-                        tokenAddress,
-                        ethers.utils.parseUnits(amountRequired.toString(), decimals),
+                        //address owner_, address token_, bytes32 merkleRoot_, uint256 expireTimestamp_
+                      writeContracts.YourContract.AstrodropERC721.init(
                         dropper,
+                        tokenAddress,
+                        merkleRoot,
                         deadline,
-                        result.IpfsHash,
+                        //result.IpfsHash,
                       ),
                     )
                       .then(result => {

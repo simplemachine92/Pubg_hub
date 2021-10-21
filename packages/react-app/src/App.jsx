@@ -22,7 +22,7 @@ import {
 import { useEventListener } from "eth-hooks/events/useEventListener";
 import { useExchangeEthPrice } from "eth-hooks/dapps/dex";
 // import Hints from "./Hints";
-import { ExampleUI, Hints, Subgraph, NewMerkler } from "./views";
+import { ExampleUI, Hints, Subgraph, NewMerkler} from "./views";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import "antd/dist/antd.css";
 
