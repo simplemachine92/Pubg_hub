@@ -13,7 +13,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     log: true,
   });
 
-  await deploy("Airdropper", {
+  await deploy("Astrodrop", {
     from: deployer,
     args: [],
     log: true,
@@ -55,4 +55,4 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   });
   */
 };
-module.exports.tags = ["YourContract"];
+module.exports.tags = ["Astrodrop", "SimpleNFT"];

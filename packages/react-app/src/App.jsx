@@ -2,7 +2,7 @@ import WalletConnectProvider from "@walletconnect/web3-provider";
 //import Torus from "@toruslabs/torus-embed"
 import WalletLink from "walletlink";
 import { CopyBlock, dracula } from "react-code-blocks";
-import { Alert, Button, Col, Input, Menu, Row, Image } from "antd";
+import { Alert, Button, Col, Input, Menu, Row, Image, Form } from "antd";
 import "antd/dist/antd.css";
 import React, { useCallback, useEffect, useState } from "react";
 import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
@@ -22,7 +22,9 @@ import {
 import { useEventListener } from "eth-hooks/events/useEventListener";
 import { useExchangeEthPrice } from "eth-hooks/dapps/dex";
 // import Hints from "./Hints";
-import { ExampleUI, Hints, Subgraph } from "./views";
+import { ExampleUI, Hints, Subgraph, NewMerkler } from "./views";
+import { InfoCircleOutlined } from "@ant-design/icons";
+import "antd/dist/antd.css";
 
 // contracts
 import deployedContracts from "./contracts/hardhat_contracts.json";
@@ -515,14 +517,14 @@ console.log(csvArray)
               MakeARoot
             </Link>
           </Menu.Item>
-          <Menu.Item key="/hints">
+          <Menu.Item key="/new">
             <Link
               onClick={() => {
-                setRoute("/hints");
+                setRoute("/new");
               }}
-              to="/hints"
+              to="/new"
             >
-              Hints
+              nMerkler
             </Link>
           </Menu.Item>
           <Menu.Item key="/exampleui">
@@ -577,12 +579,21 @@ console.log(csvArray)
           <Route exact path="/airdrop">
             <h1>Airdrop</h1>
             <Contract
-              name="Airdropper"
+              name="Astrodrop"
               signer={userSigner}
               provider={localProvider}
               address={address}
               blockExplorer={blockExplorer}
               contractConfig={contractConfig}
+            />
+          </Route>
+          <Route path="/new">
+            <NewMerkler
+              readContracts={readContracts}
+              writeContracts={writeContracts}
+              localProvider={localProvider}
+              userSigner={userSigner}
+              address={address}
             />
           </Route>
           <Route path="/hints">
@@ -610,6 +621,55 @@ console.log(csvArray)
                   setUserValue(e.target.value);
                 }}
               />
+              <Form.Item
+          label="Recipients and amounts"
+          name="recipients"
+          style={{ margin: 0 }}
+          tooltip={{
+            title: "Enter each recipient as a separate row, with their address and the amount in whole units e.g. 1.0",
+            icon: <InfoCircleOutlined />,
+          }}
+        >
+          <Input.TextArea
+            placeholder={`0xaddress,amount\n0xaddress,amount\n0xaddress,amount`}
+            onChange={event => {
+              const results = readString(event.target.value, { dynamicTyping: true });
+
+              let newAmountRequired;
+              let invalidData;
+
+              try {
+                if (results.data) {
+                  newAmountRequired = results.data.reduce((previousValue, current) => {
+                    if (
+                      !ethers.utils.isAddress(current[0]) ||
+                      !(current.length == 2 || (current.length == 3 && current[2] == "")) ||
+                      !(typeof current[1] === "number")
+                    ) {
+                      invalidData = true;
+                    }
+                    return Math.round((previousValue + current[1]) * 1e12) / 1e12;
+                  }, 0);
+                  console.log({ newAmountRequired });
+                  console.log({ invalidData });
+
+                  if (invalidData) throw "invalid data";
+
+                  setAmountRequired(newAmountRequired);
+
+                  let transformedData = results.data.map((element, index) => {
+                    return [index, element[0], ethers.utils.parseUnits(String(element[1]), decimals)];
+                  });
+
+                  setMerkleJson(transformedData);
+                }
+              } catch (e) {
+                console.log(e);
+              }
+            }}
+            rows={4}
+          />
+        </Form.Item>
             </div>
             <Button
               style={{ margin: 8 }}
