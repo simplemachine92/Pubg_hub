@@ -8,9 +8,10 @@ import React, { useCallback, useEffect, useState } from "react";
 import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
 import Web3Modal from "web3modal";
 import "./App.css";
-import { Account, Contract, Faucet, GasGauge, Header, Ramp, ThemeSwitch } from "./components";
+import { Account, Contract, GasGauge, Header, Ramp, ThemeSwitch } from "./components";
 import { INFURA_ID, NETWORK, NETWORKS } from "./constants";
 import { Transactor } from "./helpers";
+import dotenv from "dotenv";
 import {
   useBalance,
   useContractLoader,
@@ -180,14 +181,13 @@ function App(props) {
   const [injectedProvider, setInjectedProvider] = useState();
   const [address, setAddress] = useState();
   const [userQuery, setUserQuery] = useState();
+  const [userQuery2, setUserQuery2] = useState();
+  const [userToken, setUserToken] = useState();
   const [userValue, setUserValue] = useState();
   const [sending, setSending] = useState();
   const [sheet, setSheet] = useState();
 
-  var newSheet = '';
-const csvArray = [];
-
-async function dothething(data, userValue) {
+async function makeAList(data, userValue, userToken) {
   //data logging is working
   //create CSV using user inputs in form of buttons for distribution amounts or token IDs
   const csvArray = [];
@@ -202,6 +202,32 @@ console.log(csvArray)
   }
   makethesheet(csvArray)
 }
+
+async function makeIteratedList(data, userToken) {
+  const csvArray = [];
+  const range = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
+  
+  var itList = range(1, userToken, 1);
+
+  if (itList.length > data.data.items.length) {
+    for (let x in data.data.items) {
+      var obj = {
+        address: (data.data.items[x].address),
+        value: (itList[x])
+    }
+    csvArray.push(obj)
+    makethesheet(csvArray)
+}}   
+  else {
+    for (let x in itList) {
+  var obj = {
+    address: (data.data.items[x].address),
+    value: (itList[x])
+}
+csvArray.push(obj)
+  }
+  makethesheet(csvArray)
+}}
 
   async function makethesheet(csvArray) {
     const csv = new ObjectsToCsv(csvArray)
@@ -251,7 +277,7 @@ console.log(csvArray)
   const tx = Transactor(userSigner, gasPrice);
 
   // Faucet Tx can be used to send funds from the faucet
-  const faucetTx = Transactor(localProvider, gasPrice);
+  //const faucetTx = Transactor(localProvider, gasPrice);
 
   // 🏗 scaffold-eth is full of handy hooks like this one to get your balance:
   const yourLocalBalance = useBalance(localProvider, address);
@@ -450,36 +476,6 @@ console.log(csvArray)
     setRoute(window.location.pathname);
   }, [setRoute]);
 
-  let faucetHint = "";
-  const faucetAvailable = localProvider && localProvider.connection && targetNetwork.name.indexOf("local") !== -1;
-
-  const [faucetClicked, setFaucetClicked] = useState(false);
-  if (
-    !faucetClicked &&
-    localProvider &&
-    localProvider._network &&
-    localProvider._network.chainId === 31337 &&
-    yourLocalBalance &&
-    ethers.utils.formatEther(yourLocalBalance) <= 0
-  ) {
-    faucetHint = (
-      <div style={{ padding: 16 }}>
-        <Button
-          type="primary"
-          onClick={() => {
-            faucetTx({
-              to: address,
-              value: ethers.utils.parseEther("0.01"),
-            });
-            setFaucetClicked(true);
-          }}
-        >
-          💰 Grab funds from the faucet ⛽️
-        </Button>
-      </div>
-    );
-  }
-
   return (
     <div className="App">
       {/* ✏️ Edit the header and change the title to your project name */}
@@ -497,66 +493,46 @@ console.log(csvArray)
               YourContract
             </Link>
           </Menu.Item>
-          <Menu.Item key="/airdrop">
+          <Menu.Item key="/astrodrop">
             <Link
               onClick={() => {
-                setRoute("/airdrop");
+                setRoute("/astrodrop");
               }}
-              to="/airdrop"
+              to="/astrodrop"
             >
-              Airdrop
+              Astrodrop
             </Link>
           </Menu.Item>
-          <Menu.Item key="/MakeARoot">
+          <Menu.Item key="/NewMerkler">
             <Link
               onClick={() => {
-                setRoute("/MakeARoot");
+                setRoute("/NewMerkler");
               }}
-              to="/MakeARoot"
+              to="/NewMerkler"
             >
-              MakeARoot
+              Merkler
             </Link>
           </Menu.Item>
-          <Menu.Item key="/new">
+          <Menu.Item key="/DistributeERC20">
             <Link
               onClick={() => {
-                setRoute("/new");
+                setRoute("/DistributeERC20");
               }}
-              to="/new"
+              to="/DistributeERC20"
             >
-              nMerkler
+              ERC20_CSV
             </Link>
           </Menu.Item>
-          <Menu.Item key="/exampleui">
+          <Menu.Item key="/DistributeNFT">
             <Link
               onClick={() => {
-                setRoute("/exampleui");
+                setRoute("/DistributeNFT");
               }}
-              to="/exampleui"
+              to="/DistributeNFT"
             >
-              ExampleUI
+              NFT_CSV
             </Link>
-          </Menu.Item>
-          <Menu.Item key="/mainnetdai">
-            <Link
-              onClick={() => {
-                setRoute("/mainnetdai");
-              }}
-              to="/mainnetdai"
-            >
-              Mainnet DAI
-            </Link>
-          </Menu.Item>
-          <Menu.Item key="/subgraph">
-            <Link
-              onClick={() => {
-                setRoute("/subgraph");
-              }}
-              to="/subgraph"
-            >
-              Subgraph
-            </Link>
-          </Menu.Item>
+            </Menu.Item>
         </Menu>
 
         <Switch>
@@ -576,8 +552,8 @@ console.log(csvArray)
               contractConfig={contractConfig}
             />
           </Route>
-          <Route exact path="/airdrop">
-            <h1>Airdrop</h1>
+          <Route exact path="/astrodrop">
+            <h1>astrodrop</h1>
             <Contract
               name="Astrodrop"
               signer={userSigner}
@@ -587,7 +563,7 @@ console.log(csvArray)
               contractConfig={contractConfig}
             />
           </Route>
-          <Route path="/new">
+          <Route path="/Merkler">
             <NewMerkler
               readContracts={readContracts}
               writeContracts={writeContracts}
@@ -604,24 +580,164 @@ console.log(csvArray)
               price={price}
             />
           </Route>
-          <Route path="/MakeARoot"> 
+          <Route path="/DistributeERC20"> 
             <div style={{ paddingTop: 32, width: 740, margin: "auto" }}>
-              <Image width={200} src="https://ipfs.io/ipfs/QmYPfVtNZUPbj2PNvDVCskgR7DBn8SQZbUvaqsoYL2Tiut" />
-              <Input
-                value={userQuery}
-                placeHolder="Enter Project Token or NFT Token Address"
-                onChange={e => {
-                  setUserQuery(e.target.value);
-                }}
-              />
-              <Input
+        <h1>Enter a value to send to each address</h1>
+        <Input
+                style={{ margin: 16 }}
                 value={userValue}
                 placeHolder="Enter Value to mass send"
                 onChange={e => {
                   setUserValue(e.target.value);
                 }}
               />
-              <Form.Item
+        <h1>Select a Public Goods Project</h1>
+        <h2>(dont forget value up top)</h2>
+              <Button
+              style={{ margin: 16 }}
+              loading={sending}
+              size="large"
+              shape="round"
+              type="primary"
+              onClick={async () => {
+                //chain_id = 1 for ETH, 137 for Polygon/Matic, 43114 for Binance
+                // Grabs list of all holders of token / nft, so we can append a value,
+                // and make a merkle json for IPFS
+                const result = await fetch(
+                  
+                  `https://api.covalenthq.com/v1/1/tokens/0x8b13e88ead7ef8075b58c94a7eb18a89fd729b18/token_holders/?page-size=2000&key=ckey_2c198a798bdc4553b499279fe87`,
+                )
+                  .then(response => response.json())
+                  //take data and organize in CSV with Holders -> amounts or token number
+                  //Amounts will be preset buttons, placed in CSV adjacent
+                  .then(data => makeAList(data, userValue)
+                  )
+                }
+              }
+            >
+              Moonshot Bots
+            </Button>
+            <Button
+              style={{ margin: 16 }}
+              loading={sending}
+              size="large"
+              shape="round"
+              type="primary"
+              onClick={async () => {
+                //chain_id = 1 for ETH, 137 for Polygon/Matic, 43114 for Binance
+                // Grabs list of all holders of token / nft, so we can append a value,
+                // and make a merkle json for IPFS
+                const result = await fetch(
+                  
+                  `https://api.covalenthq.com/v1/1/tokens/0x82C7c02a52B75387DB14FA375938496cbb984388/token_holders/?page-size=2000&key=ckey_2c198a798bdc4553b499279fe87`,
+                )
+                  .then(response => response.json())
+                  //take data and organize in CSV with Holders -> amounts or token number
+                  //Amounts will be preset buttons, placed in CSV adjacent
+                  .then(data => makeAList(data, userValue)
+                  )
+                }
+              }
+            >
+              LARP(ETHBots)
+            </Button>
+            <Button
+              style={{ margin: 16 }}
+              loading={sending}
+              size="large"
+              shape="round"
+              type="primary"
+              onClick={async () => {
+                //chain_id = 1 for ETH, 137 for Polygon/Matic, 43114 for Binance
+                // Grabs list of all holders of token / nft, so we can append a value,
+                // and make a merkle json for IPFS
+                const result = await fetch(
+                  
+                  `https://api.covalenthq.com/v1/1/tokens/0x42dcba5da33cddb8202cc182a443a3e7b299dadb/token_holders/?page-size=2000&key=ckey_2c198a798bdc4553b499279fe87`,
+                )
+                  .then(response => response.json())
+                  //take data and organize in CSV with Holders -> amounts or token number
+                  //Amounts will be preset buttons, placed in CSV adjacent
+                  .then(data => makeAList(data, userValue)
+                  )
+                }
+              }
+            >
+              LARP(Molochs)
+            </Button>
+            <Button
+              style={{ margin: 16 }}
+              loading={sending}
+              size="large"
+              shape="round"
+              type="primary"
+              onClick={async () => {
+                //chain_id = 1 for ETH, 137 for Polygon/Matic, 43114 for Binance
+                // Grabs list of all holders of token / nft, so we can append a value,
+                // and make a merkle json for IPFS
+                const result = await fetch(
+                  
+                  `https://api.covalenthq.com/v1/1/tokens/0xf5918382Dd20Ecba89747c50f80fB7f9f1e0524C/token_holders/?page-size=2000&key=ckey_2c198a798bdc4553b499279fe87`,
+                )
+                  .then(response => response.json())
+                  //take data and organize in CSV with Holders -> amounts or token number
+                  //Amounts will be preset buttons, placed in CSV adjacent
+                  .then(data => makeAList(data, userValue)
+                  )
+                }
+              }
+            >
+              RainbowRolls
+            </Button>
+            <Button
+              style={{ margin: 16 }}
+              loading={sending}
+              size="large"
+              shape="round"
+              type="primary"
+              onClick={async () => {
+                //chain_id = 1 for ETH, 137 for Polygon/Matic, 43114 for Binance
+                // Grabs list of all holders of token / nft, so we can append a value,
+                // and make a merkle json for IPFS
+                const result = await fetch(
+                  
+                  `https://api.covalenthq.com/v1/1/tokens/0x711d2aC13b86BE157795B576dE4bbe6827564111/token_holders/?page-size=2000&key=ckey_2c198a798bdc4553b499279fe87`,
+                )
+                  .then(response => response.json())
+                  //take data and organize in CSV with Holders -> amounts or token number
+                  //Amounts will be preset buttons, placed in CSV adjacent
+                  .then(data => makeAList(data, userValue)
+                  )
+                }
+              }
+            >
+              Mars-Shot Bots
+            </Button>
+            <Button
+              style={{ margin: 16 }}
+              loading={sending}
+              size="large"
+              shape="round"
+              type="primary"
+              onClick={async () => {
+                //chain_id = 1 for ETH, 137 for Polygon/Matic, 43114 for Binance
+                // Grabs list of all holders of token / nft, so we can append a value,
+                // and make a merkle json for IPFS
+                const result = await fetch(
+                  
+                  `https://api.covalenthq.com/v1/1/tokens/0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03/token_holders/?page-size=2000&key=ckey_2c198a798bdc4553b499279fe87`,
+                )
+                  .then(response => response.json())
+                  //take data and organize in CSV with Holders -> amounts or token number
+                  //Amounts will be preset buttons, placed in CSV adjacent
+                  .then(data => makeAList(data, userValue)
+                  )
+                }
+              }
+            >
+              Nouns.wtf
+            </Button>
+              {/* <Form.Item
           label="Recipients and amounts"
           name="recipients"
           style={{ margin: 0 }}
@@ -669,10 +785,18 @@ console.log(csvArray)
             }}
             rows={4}
           />
-        </Form.Item>
-            </div>
-            <Button
-              style={{ margin: 8 }}
+        </Form.Item> */}
+        <h1>Or enter any token address and submit.</h1>
+              <Input
+              style={{ margin: 16 }}
+                value={userQuery}
+                placeHolder="Enter Project Token or NFT Token Address"
+                onChange={e => {
+                  setUserQuery(e.target.value);
+                }}
+              />
+              <Button
+              style={{ margin: 16 }}
               loading={sending}
               size="large"
               shape="round"
@@ -688,7 +812,7 @@ console.log(csvArray)
                   .then(response => response.json())
                   //take data and organize in CSV with Holders -> amounts or token number
                   //Amounts will be preset buttons, placed in CSV adjacent
-                  .then(data => dothething(data, userValue)
+                  .then(data => makeAList(data, userValue)
                   )
                 }
               }
@@ -700,6 +824,8 @@ console.log(csvArray)
             >
               Submit
             </Button>
+        <h1>Copy your list below into the Merkler!</h1>
+            </div>
             <CopyBlock
       text={sheet || 'Copy this list after submitting!'}
       theme={dracula}
@@ -710,6 +836,66 @@ console.log(csvArray)
       codeBlock
     /> 
           </Route>
+          <Route path="/DistributeNFT">
+          <div style={{ paddingTop: 32, width: 740, margin: "auto" }}>
+          <h1>Enter address and number of tokens to distribute</h1>
+          <h3>If you enter more/less tokens than there are holders, the list will truncate.</h3>
+              <Input
+              style={{ margin: 16 }}
+                value={userQuery2}
+                placeHolder="Enter Project Token or NFT Token Address"
+                onChange={e => {
+                  setUserQuery2(e.target.value);
+                }}
+              />
+              <Input
+              style={{ margin: 16 }}
+                value={userToken}
+                placeHolder="Max Number of Mints (tokenID 1 -> x)"
+                onChange={e => {
+                  setUserToken(e.target.value);
+                }}
+              />
+              <Button
+              style={{ margin: 16 }}
+              loading={sending}
+              size="large"
+              shape="round"
+              type="primary"
+              onClick={async () => {
+                //chain_id = 1 for ETH, 137 for Polygon/Matic, 43114 for Binance
+                // Grabs list of all holders of token / nft, so we can append a value,
+                // and make a merkle json for IPFS
+                const result = await fetch(
+                  
+                  `https://api.covalenthq.com/v1/1/tokens/${userQuery2}/token_holders/?page-size=2000&key=ckey_2c198a798bdc4553b499279fe87`,
+                )
+                  .then(response => response.json())
+                  //take data and organize in CSV with Holders -> amounts or token number
+                  //Amounts will be preset buttons, placed in CSV adjacent
+                  .then(data => makeIteratedList(data, userToken)
+                  )
+                }
+              }
+                    
+                    /* {const transform = data
+                    for (let x in transform.length) {
+                      console.log(transform[x].address)}
+                    })}    }     */
+            >
+              Submit
+            </Button>
+            </div>
+            <CopyBlock
+      text={sheet || 'Copy this list after submitting!'}
+      theme={dracula}
+      language='text'
+      //showLineNumbers={props.showLineNumbers}
+      //startingLineNumber={props.startingLineNumber}
+      //wrapLines
+      codeBlock
+    /> 
+            </Route>
           <Route path="/exampleui">
             <ExampleUI
               address={address}
@@ -773,47 +959,6 @@ console.log(csvArray)
           logoutOfWeb3Modal={logoutOfWeb3Modal}
           blockExplorer={blockExplorer}
         />
-        {faucetHint}
-      </div>
-
-      {/* 🗺 Extra UI like gas price, eth price, faucet, and support: */}
-      <div style={{ position: "fixed", textAlign: "left", left: 0, bottom: 20, padding: 10 }}>
-        <Row align="middle" gutter={[4, 4]}>
-          <Col span={8}>
-            <Ramp price={price} address={address} networks={NETWORKS} />
-          </Col>
-
-          <Col span={8} style={{ textAlign: "center", opacity: 0.8 }}>
-            <GasGauge gasPrice={gasPrice} />
-          </Col>
-          <Col span={8} style={{ textAlign: "center", opacity: 1 }}>
-            <Button
-              onClick={() => {
-                window.open("https://t.me/joinchat/KByvmRe5wkR-8F_zz6AjpA");
-              }}
-              size="large"
-              shape="round"
-            >
-              <span style={{ marginRight: 8 }} role="img" aria-label="support">
-                💬
-              </span>
-              Support
-            </Button>
-          </Col>
-        </Row>
-
-        <Row align="middle" gutter={[4, 4]}>
-          <Col span={24}>
-            {
-              /*  if the local provider has a signer, let's show the faucet:  */
-              faucetAvailable ? (
-                <Faucet localProvider={localProvider} price={price} ensProvider={mainnetProvider} />
-              ) : (
-                ""
-              )
-            }
-          </Col>
-        </Row>
       </div>
     </div>
   );

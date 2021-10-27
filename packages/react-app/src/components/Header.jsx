@@ -8,7 +8,7 @@ export default function Header() {
     <a href="https://github.com/austintgriffith/scaffold-eth" target="_blank" rel="noopener noreferrer">
       <PageHeader
         title="Pubg_hub"
-        subTitle="merkle me some tokens bro"
+        subTitle=""
         
         
         style={{ cursor: "pointer" }}

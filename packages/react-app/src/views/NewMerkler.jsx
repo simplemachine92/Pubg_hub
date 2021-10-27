@@ -313,7 +313,7 @@ import {
   
                     tx(
                         //address owner_, address token_, bytes32 merkleRoot_, uint256 expireTimestamp_
-                      writeContracts.YourContract.AstrodropERC721.init(
+                      writeContracts.AstrodropERC721.init(
                         dropper,
                         tokenAddress,
                         merkleRoot,
