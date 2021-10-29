@@ -15,6 +15,7 @@ If you want it to compile, either import it into contract.sol or copy and paste 
 contract SimpleNFT is ERC721URIStorage, Ownable {
 		uint256 public tokenCounter = 0;
 		string public userTokenURI = 'https://ipfs.io/ipfs/QmYPfVtNZUPbj2PNvDVCskgR7DBn8SQZbUvaqsoYL2Tiut';
+		string public setUserTokenURI;
 
     constructor() ERC721("MINTLER", "MINTR") {
 			
@@ -30,6 +31,9 @@ contract SimpleNFT is ERC721URIStorage, Ownable {
 
         return tokenCounter;
     }
+
+	
+
 	function getURI() public view returns (string memory) {
 		return userTokenURI;
 	}

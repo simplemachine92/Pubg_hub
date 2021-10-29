@@ -13,6 +13,14 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     log: true,
   });
 
+  const SimpleNFT = await ethers.getContract("SimpleNFT");
+
+  await deploy("NFTDeployer", {
+    from: deployer,
+    args: [SimpleNFT.address],
+    log: true,
+  });
+
   /*
     // Getting a previously deployed contract
     const YourContract = await ethers.getContract("YourContract", deployer);
