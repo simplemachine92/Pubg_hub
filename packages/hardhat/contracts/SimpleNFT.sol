@@ -18,18 +18,18 @@ contract SimpleNFT is ERC721URIStorage, Initializable, Ownable {
 		string public userTokenURI;
 		string public setUserTokenURI;
 
-    constructor() ERC721("MINTLER", "MINTR") {
-			
+    constructor(string memory _userTokenURI) ERC721("MINTLER", "MINTR") {
+			userTokenURI = _userTokenURI;
     }
 
-    function mint(address recipient) public returns (uint256) {
-			
+    function mint(address recipient, uint256 amount) public returns (uint256) {
+			while (tokenCounter < amount ) {
         _mint(recipient, tokenCounter);
 
         _setTokenURI(tokenCounter, userTokenURI);
 
         tokenCounter = tokenCounter + 1;
-
+            }
         return tokenCounter;
     }
 

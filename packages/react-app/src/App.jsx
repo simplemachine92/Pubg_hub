@@ -694,13 +694,13 @@ csvArray.push(obj)
               /* look how you call setPurpose on your contract: */
               /* notice how you pass a call back for tx updates too */
               const result = tx(
-                writeContracts.NFTDeployer.deploy(newPurpose)
+                writeContracts.SimpleNFT.initializeSimpleNFT(newPurpose)
               )
                 .then(result => {
                   console.log(result);
                   result.wait().then(receipt => {
                     console.log(receipt);
-                    history.push(`/view/${receipt.events[0].args._address}`);
+                    history.push(`/view/${receipt.events[receipt.events.length - 1].args._address}`);
                   });
                 })
                 .catch(err => {

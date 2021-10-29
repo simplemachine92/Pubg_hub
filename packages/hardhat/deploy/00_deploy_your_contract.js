@@ -9,7 +9,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   await deploy("SimpleNFT", {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
     from: deployer,
-    // args: [ "_token", ethers.utils.parseEther("1.5") ],
+    args: ["https://ipfs.io/ipfs/QmYPfVtNZUPbj2PNvDVCskgR7DBn8SQZbUvaqsoYL2Tiut"],
     log: true,
   });
 

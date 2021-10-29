@@ -9,7 +9,7 @@ interface ISimpleNFT {
     // Returns the address of the token distributed by this contract.
     //function token() external view returns (address);
 
-    function mint(address recipient) external returns (uint256);
+    function mint(address recipient, uint256 amount) external returns (uint256);
 
     function getURI() external view returns (string memory);
 
