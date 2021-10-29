@@ -3,6 +3,7 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
 // To read more about NFTs, checkout the ERC721 standard:
 // https://eips.ethereum.org/EIPS/eip-721 
@@ -12,9 +13,9 @@ NOTE: THIS WILL NOT BE AUTOMATICALLY COMPILED.
 If you want it to compile, either import it into contract.sol or copy and paste the contract directly into there!
 **/
 
-contract SimpleNFT is ERC721URIStorage, Ownable {
+contract SimpleNFT is ERC721URIStorage, Initializable, Ownable {
 		uint256 public tokenCounter = 0;
-		string public userTokenURI = 'https://ipfs.io/ipfs/QmYPfVtNZUPbj2PNvDVCskgR7DBn8SQZbUvaqsoYL2Tiut';
+		string public userTokenURI;
 		string public setUserTokenURI;
 
     constructor() ERC721("MINTLER", "MINTR") {
@@ -32,7 +33,9 @@ contract SimpleNFT is ERC721URIStorage, Ownable {
         return tokenCounter;
     }
 
-	
+	function initializeSimpleNFT(string memory _tokenURI) public initializer {
+        userTokenURI = _tokenURI;
+    }
 
 	function getURI() public view returns (string memory) {
 		return userTokenURI;

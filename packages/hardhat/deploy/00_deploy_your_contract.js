@@ -57,4 +57,4 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   });
   */
 };
-module.exports.tags = ["Astrodrop", "SimpleNFT"];
+module.exports.tags = ["NFTDeployer", "SimpleNFT"];
