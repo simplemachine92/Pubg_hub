@@ -8,9 +8,11 @@ import React, { useCallback, useEffect, useState } from "react";
 import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
 import Web3Modal from "web3modal";
 import "./App.css";
+import fs from "fs";
 import { Account, Contract, GasGauge, Header, Ramp, ThemeSwitch } from "./components";
 import { INFURA_ID, NETWORK, NETWORKS } from "./constants";
 import { Transactor } from "./helpers";
+import {useDropzone} from 'react-dropzone';
 import dotenv from "dotenv";
 import {
   useBalance,
@@ -35,6 +37,91 @@ import { useContractConfig } from "./hooks";
 import Portis from "@portis/web3";
 import Fortmatic from "fortmatic";
 import Authereum from "authereum";
+
+import { NFTStorage, File, Blob } from "nft.storage"
+const client = new NFTStorage({ token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDllRjc3OGNjQ0VCOEQ2NTg2ZDllRjYxYTEwNTk1Y0QyNDUwMGU5YUQiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTYzNTQ4MDM3MDAxMywibmFtZSI6ImRkIn0.Cy-vLvDjMBUGw8vuXTcM7Lv0Lj07aPx_S_LpHwRnV6c' })
+
+const thumbsContainer = {
+  display: 'flex',
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  marginTop: 16
+};
+
+const thumb = {
+  display: 'inline-flex',
+  borderRadius: 2,
+  border: '1px solid #eaeaea',
+  marginBottom: 8,
+  marginRight: 8,
+  width: 100,
+  height: 100,
+  padding: 4,
+  boxSizing: 'border-box'
+};
+
+const thumbInner = {
+  display: 'flex',
+  minWidth: 0,
+  overflow: 'hidden'
+};
+
+const img = {
+  display: 'block',
+  width: 'auto',
+  height: '100%'
+};
+
+function Previews(props) {
+  const [files, setFiles] = useState([]);
+  const {getRootProps, getInputProps} = useDropzone({
+    accept: 'image/jpeg, image/png',
+    maxFiles:1,
+    onDrop: acceptedFiles => {
+      setFiles(acceptedFiles.map(file => Object.assign(file, {
+        preview: URL.createObjectURL(file),
+        pinblob: pintoStorage(file)
+      })));
+    }
+  });
+  
+  const thumbs = files.map(file => (
+    <div style={thumb} key={file.name}>
+      <div style={thumbInner}>
+        <img
+          src={file.preview}
+          style={img}
+        />
+      </div>
+    </div>
+  ));
+
+  useEffect(() => () => {
+    // Make sure to revoke the data uris to avoid memory leaks
+    files.forEach(file => URL.revokeObjectURL(file.preview));
+  }, [files]);
+
+  return (
+    <section className="container">
+      <div {...getRootProps({className: 'dropzone'})}>
+        <input {...getInputProps()} />
+        <p>Drag 'n' drop some files here, or click to select files</p>
+      </div>
+      <aside style={thumbsContainer}>
+        {thumbs}
+      </aside>
+    </section>
+  );
+}
+
+<Previews />
+
+async function pintoStorage(file) {
+  //var url = URL.createObjectURL(file)
+ //const data = await fs.promises.readFile(`${url}`)
+  var cid = await client.storeBlob(new Blob([file]))
+  console.log(cid)
+}
 
 const ObjectsToCsv = require('objects-to-csv');
 const { ethers } = require("ethers");
@@ -493,26 +580,16 @@ csvArray.push(obj)
               YourContract
             </Link>
           </Menu.Item>
-          <Menu.Item key="/astrodrop">
+          <Menu.Item key="/newNFT">
             <Link
               onClick={() => {
-                setRoute("/astrodrop");
+                setRoute("/newNFT");
               }}
-              to="/astrodrop"
+              to="/newNFT"
             >
-              Astrodrop
+              newNFT
             </Link>
-          </Menu.Item>
-          <Menu.Item key="/NewMerkler">
-            <Link
-              onClick={() => {
-                setRoute("/NewMerkler");
-              }}
-              to="/NewMerkler"
-            >
-              Merkler
-            </Link>
-          </Menu.Item>
+            </Menu.Item>
           <Menu.Item key="/DistributeERC20">
             <Link
               onClick={() => {
@@ -552,16 +629,11 @@ csvArray.push(obj)
               contractConfig={contractConfig}
             />
           </Route>
-          <Route exact path="/astrodrop">
-            <h1>astrodrop</h1>
-            <Contract
-              name="Astrodrop"
-              signer={userSigner}
-              provider={localProvider}
-              address={address}
-              blockExplorer={blockExplorer}
-              contractConfig={contractConfig}
-            />
+          <Route exact path="/newNFT">
+          <div style={{ paddingTop: 32, width: 740, margin: "auto" }}>
+          <Previews/>
+            <h1>Drag and drop a png/jpeg</h1>
+            </div>
           </Route>
           <Route path="/Merkler">
             <NewMerkler
