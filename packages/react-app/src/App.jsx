@@ -2,10 +2,10 @@ import WalletConnectProvider from "@walletconnect/web3-provider";
 //import Torus from "@toruslabs/torus-embed"
 import WalletLink from "walletlink";
 import { CopyBlock, dracula } from "react-code-blocks";
-import { Alert, Button, Col, Input, Menu, Row, Image, Form } from "antd";
+import { Alert, Button, Col, Input, Menu, Row, Image, Form, Card, List } from "antd";
 import "antd/dist/antd.css";
 import React, { useCallback, useEffect, useState } from "react";
-import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
+import { BrowserRouter, Link, Route, Switch, useHistory } from "react-router-dom";
 import Web3Modal from "web3modal";
 import "./App.css";
 import fs from "fs";
@@ -121,8 +121,9 @@ async function pintoStorage(file) {
  //const data = await fs.promises.readFile(`${url}`)
   var cid = await client.storeBlob(new Blob([file]))
   console.log(cid)
-}
 
+  return (cid)
+}
 const ObjectsToCsv = require('objects-to-csv');
 const { ethers } = require("ethers");
 /*
@@ -258,6 +259,7 @@ const web3Modal = new Web3Modal({
 });
 
 function App(props) {
+  const history = useHistory();
   const mainnetProvider =
     poktMainnetProvider && poktMainnetProvider._isProvider
       ? poktMainnetProvider
@@ -273,6 +275,7 @@ function App(props) {
   const [userValue, setUserValue] = useState();
   const [sending, setSending] = useState();
   const [sheet, setSheet] = useState();
+  const [newPurpose, setNewPurpose] = useState("loading...");
 
 async function makeAList(data, userValue, userToken) {
   //data logging is working
@@ -401,7 +404,7 @@ csvArray.push(obj)
   const purpose = useContractReader(readContracts, "YourContract", "purpose");
 
   // 📟 Listen for broadcast events
-  const setPurposeEvents = useEventListener(readContracts, "YourContract", "SetPurpose", localProvider, 1);
+  const setPurposeEvents = useEventListener(readContracts, "NFTDeployer", "Deployed", localProvider, 1);
 
   /*
   const addressFromENS = useResolveName(mainnetProvider, "austingriffith.eth");
@@ -629,10 +632,85 @@ csvArray.push(obj)
               contractConfig={contractConfig}
             />
           </Route>
+          <Route exact path="/instance">
+            {/*
+                🎛 this scaffolding is full of commonly used components
+                this <Contract/> component will automatically parse your ABI
+                and give you a form to interact with it locally
+            */}
+            <Card title={"Deployments"} style={{ maxWidth: 600, margin: "auto", marginTop: 10 }}>
+              <List
+                itemLayout="horizontal"
+                rowKey={item => `${item.transactionHash}_${item.logIndex}`}
+                dataSource={setPurposeEvents}
+                renderItem={item => (
+                  <List.Item>
+                    <List.Item.Meta
+                      title={
+                        <Link to={`/view/${item.args._address}`}>
+                          <Address value={item.args._address} />
+                        </Link>
+                      }
+                      description={`${ethers.utils.formatUnits(item.args._amount, item.args._decimals)} ${
+                        item.args._symbol
+                      } dropped by ${item.args._dropper}`}
+                    />
+                  </List.Item>
+                )}
+              />
+            </Card>
+          </Route>
+          <Route path="/view/:merkler">
+            <Contract
+              readContracts={readContracts}
+              writeContracts={writeContracts}
+              localProvider={localProvider}
+              userSigner={userSigner}
+              address={address}
+              localChainId={localChainId}
+            />
+          </Route>
           <Route exact path="/newNFT">
           <div style={{ paddingTop: 32, width: 740, margin: "auto" }}>
           <Previews/>
-            <h1>Drag and drop a png/jpeg</h1>
+            <h1>Drag and drop a png/jpeg </h1>
+            <h2> {!pintoStorage} </h2>
+            <Contract
+              name="NFTDeployer"
+              signer={userSigner}
+              provider={localProvider}
+              address={address}
+              blockExplorer={blockExplorer}
+              contractConfig={contractConfig}
+            />
+            <Input
+            onChange={e => {
+              setNewPurpose(e.target.value);
+            }}
+          />
+            <Button
+            style={{ marginTop: 8 }}
+            onClick={async () => {
+              /* look how you call setPurpose on your contract: */
+              /* notice how you pass a call back for tx updates too */
+              const result = tx(
+                writeContracts.NFTDeployer.deploy(newPurpose)
+              )
+                .then(result => {
+                  console.log(result);
+                  result.wait().then(receipt => {
+                    console.log(receipt);
+                    history.push(`/view/${receipt.events[0].args._address}`);
+                  });
+                })
+                .catch(err => {
+                  //handle error here
+                  console.log(err);
+                });
+              }}
+          >
+            Set Purpose!
+          </Button>
             </div>
           </Route>
           <Route path="/Merkler">

@@ -3,6 +3,7 @@ import { utils } from "ethers";
 import { Button, Card, DatePicker, Divider, Input, List, Progress, Slider, Spin, Switch } from "antd";
 import React, { useState } from "react";
 import { Address, Balance } from "../components";
+import {useHistory } from "react-router-dom";
 
 export default function ExampleUI({
   purpose,
@@ -17,6 +18,7 @@ export default function ExampleUI({
   writeContracts,
 }) {
   const [newPurpose, setNewPurpose] = useState("loading...");
+  const history = useHistory();
 
   return (
     <div>
@@ -38,24 +40,21 @@ export default function ExampleUI({
             onClick={async () => {
               /* look how you call setPurpose on your contract: */
               /* notice how you pass a call back for tx updates too */
-              const result = tx(writeContracts.YourContract.setPurpose(newPurpose), update => {
-                console.log("📡 Transaction Update:", update);
-                if (update && (update.status === "confirmed" || update.status === 1)) {
-                  console.log(" 🍾 Transaction " + update.hash + " finished!");
-                  console.log(
-                    " ⛽️ " +
-                      update.gasUsed +
-                      "/" +
-                      (update.gasLimit || update.gas) +
-                      " @ " +
-                      parseFloat(update.gasPrice) / 1000000000 +
-                      " gwei",
-                  );
-                }
-              });
-              console.log("awaiting metamask/web3 confirm result...", result);
-              console.log(await result);
-            }}
+              const result = tx(
+                writeContracts.NFTDeployer.deploy(newPurpose)
+              )
+                .then(result => {
+                  console.log(result);
+                  result.wait().then(receipt => {
+                    console.log(receipt.events[0].args._address);
+                    history.push(`/view/${receipt.events[0].args._address}`);
+                  });
+                })
+                .catch(err => {
+                  //handle error here
+                  console.log(err);
+                });
+              }}
           >
             Set Purpose!
           </Button>
