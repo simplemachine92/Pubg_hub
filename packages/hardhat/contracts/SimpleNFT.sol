@@ -14,24 +14,23 @@ If you want it to compile, either import it into contract.sol or copy and paste 
 
 contract SimpleNFT is ERC721URIStorage, Ownable {
 		uint256 public tokenCounter = 0;
+		string public userTokenURI = 'https://ipfs.io/ipfs/QmYPfVtNZUPbj2PNvDVCskgR7DBn8SQZbUvaqsoYL2Tiut';
 
-		// You can pass in your own NFT name and symbol (like a stock ticker) here!
-    constructor() ERC721("NFT Name", "SYMBOL") {
-			// Put any initialization code inside of the constructor
+    constructor() ERC721("MINTLER", "MINTR") {
+			
     }
 
-		// minting is essentially creating the NFT.
-		// you pass in who will own it and the link to the token's URI - which is usually a link to an image hosted on IPFS.
-    function mint(address recipient, string memory tokenURI) public returns (uint256) {
-				// _mint is a built in function that actually puts your NFT onto the blockchain
+    function mint(address recipient) public returns (uint256) {
+			
         _mint(recipient, tokenCounter);
 
-				// this will set the tokenURI of the NFT to the tokenURI that you pass in through this function.
-        _setTokenURI(tokenCounter, tokenURI);
+        _setTokenURI(tokenCounter, userTokenURI);
 
-				// every time you mint, increment the amount of tokens you've created by 1.
         tokenCounter = tokenCounter + 1;
-				// we return the current token count, which is being used as the ID of the NFT.
+
         return tokenCounter;
     }
+	function getURI() public view returns (string memory) {
+		return userTokenURI;
+	}
 }

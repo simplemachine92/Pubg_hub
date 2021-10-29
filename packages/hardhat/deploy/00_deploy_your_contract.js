@@ -13,12 +13,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     log: true,
   });
 
-  await deploy("Astrodrop", {
-    from: deployer,
-    args: [],
-    log: true,
-  });
-
   /*
     // Getting a previously deployed contract
     const YourContract = await ethers.getContract("YourContract", deployer);
