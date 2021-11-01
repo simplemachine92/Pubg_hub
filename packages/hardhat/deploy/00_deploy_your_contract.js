@@ -9,7 +9,9 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   await deploy("SimpleNFT", {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
     from: deployer,
-    args: ["https://ipfs.io/ipfs/QmYPfVtNZUPbj2PNvDVCskgR7DBn8SQZbUvaqsoYL2Tiut"],
+    args: [
+      "https://ipfs.io/ipfs/QmYPfVtNZUPbj2PNvDVCskgR7DBn8SQZbUvaqsoYL2Tiut",
+    ],
     log: true,
   });
 
@@ -18,6 +20,12 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   await deploy("NFTDeployer", {
     from: deployer,
     args: [SimpleNFT.address],
+    log: true,
+  });
+
+  await deploy("NFTDropper", {
+    from: deployer,
+    args: [],
     log: true,
   });
 
@@ -57,4 +65,4 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   });
   */
 };
-module.exports.tags = ["NFTDeployer", "SimpleNFT"];
+module.exports.tags = ["NFTDeployer", "SimpleNFT", "NFTDropper"];
