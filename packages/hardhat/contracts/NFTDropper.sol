@@ -21,7 +21,7 @@ abstract contract Deployer {
 contract NFTDropper {
     constructor() {}
 
-    function airdrop(
+    function massDrop(
         address _nftDeployerAddress,
         address[] memory _recepients,
         string memory _tokenURI

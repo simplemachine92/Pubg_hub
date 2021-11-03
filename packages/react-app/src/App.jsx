@@ -9,7 +9,7 @@ import { BrowserRouter, Link, Route, Switch, useHistory } from "react-router-dom
 import Web3Modal from "web3modal";
 import "./App.css";
 import fs from "fs";
-import { Account, Contract, GasGauge, Header, Ramp, ThemeSwitch } from "./components";
+import { Account, AddressInput, Contract, GasGauge, Header, Ramp, ThemeSwitch } from "./components";
 import { INFURA_ID, NETWORK, NETWORKS } from "./constants";
 import { Transactor } from "./helpers";
 import { useDropzone } from "react-dropzone";
@@ -75,8 +75,7 @@ const img = {
   height: "100%",
 };
 
-function Previews(props) {
-  const [files, setFiles] = useState([]);
+function Previews({ files, setFiles }) {
   const { getRootProps, getInputProps } = useDropzone({
     accept: "image/jpeg, image/png",
     maxFiles: 1,
@@ -281,6 +280,8 @@ function App(props) {
   const [sending, setSending] = useState();
   const [sheet, setSheet] = useState();
   const [newPurpose, setNewPurpose] = useState("loading...");
+  const [files, setFiles] = useState([]);
+  const [massDropRecepients, setMassDropRecepients] = useState([]);
 
   async function makeAList(data, userValue, userToken) {
     //data logging is working
@@ -678,9 +679,40 @@ function App(props) {
           </Route>
           <Route exact path="/newNFT">
             <div style={{ paddingTop: 32, width: 740, margin: "auto" }}>
-              <Previews />
+              <Previews files={files} setFiles={setFiles} />
               <h1>Drag and drop a png/jpeg </h1>
               <h2> {!pintoStorage} </h2>
+
+              <label>Recepients</label>
+              <Input
+                placeholder='["0x00000000", "0x111111111"]'
+                value={massDropRecepients}
+                onChange={e => setMassDropRecepients(e.target.value)}
+              />
+
+              <Button
+                onClick={async () => {
+                  const result = tx(
+                    writeContracts.NFTDropper.massDrop(
+                      readContracts.NFTDeployer.address,
+                      JSON.parse(massDropRecepients),
+                      files[0].pinblob,
+                    ),
+                  )
+                    .then(result => {
+                      console.log(result);
+                      result.wait().then(receipt => {
+                        console.log(receipt);
+                      });
+                    })
+                    .catch(err => {
+                      //handle error here
+                      console.log(err);
+                    });
+                }}
+              >
+                Drop NFTS
+              </Button>
               <Contract
                 name="NFTDeployer"
                 signer={userSigner}
