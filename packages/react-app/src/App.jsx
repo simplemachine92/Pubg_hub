@@ -9,10 +9,10 @@ import { BrowserRouter, Link, Route, Switch, useHistory } from "react-router-dom
 import Web3Modal from "web3modal";
 import "./App.css";
 import fs from "fs";
-import { Account, Contract, GasGauge, Header, Ramp, ThemeSwitch } from "./components";
+import { Account, AddressInput, Contract, GasGauge, Header, Ramp, ThemeSwitch } from "./components";
 import { INFURA_ID, NETWORK, NETWORKS } from "./constants";
 import { Transactor } from "./helpers";
-import {useDropzone} from 'react-dropzone';
+import { useDropzone } from "react-dropzone";
 import dotenv from "dotenv";
 import {
   useBalance,
@@ -25,7 +25,7 @@ import {
 import { useEventListener } from "eth-hooks/events/useEventListener";
 import { useExchangeEthPrice } from "eth-hooks/dapps/dex";
 // import Hints from "./Hints";
-import { ExampleUI, Hints, Subgraph, NewMerkler} from "./views";
+import { ExampleUI, Hints, Subgraph, NewMerkler } from "./views";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import "antd/dist/antd.css";
 
@@ -38,93 +38,97 @@ import Portis from "@portis/web3";
 import Fortmatic from "fortmatic";
 import Authereum from "authereum";
 
-import { NFTStorage, File, Blob } from "nft.storage"
-const client = new NFTStorage({ token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDllRjc3OGNjQ0VCOEQ2NTg2ZDllRjYxYTEwNTk1Y0QyNDUwMGU5YUQiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTYzNTQ4MDM3MDAxMywibmFtZSI6ImRkIn0.Cy-vLvDjMBUGw8vuXTcM7Lv0Lj07aPx_S_LpHwRnV6c' })
+import { NFTStorage, File, Blob } from "nft.storage";
+const client = new NFTStorage({
+  token:
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDllRjc3OGNjQ0VCOEQ2NTg2ZDllRjYxYTEwNTk1Y0QyNDUwMGU5YUQiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTYzNTQ4MDM3MDAxMywibmFtZSI6ImRkIn0.Cy-vLvDjMBUGw8vuXTcM7Lv0Lj07aPx_S_LpHwRnV6c",
+});
 
 const thumbsContainer = {
-  display: 'flex',
-  flexDirection: 'row',
-  flexWrap: 'wrap',
-  marginTop: 16
+  display: "flex",
+  flexDirection: "row",
+  flexWrap: "wrap",
+  marginTop: 16,
 };
 
 const thumb = {
-  display: 'inline-flex',
+  display: "inline-flex",
   borderRadius: 2,
-  border: '1px solid #eaeaea',
+  border: "1px solid #eaeaea",
   marginBottom: 8,
   marginRight: 8,
   width: 100,
   height: 100,
   padding: 4,
-  boxSizing: 'border-box'
+  boxSizing: "border-box",
 };
 
 const thumbInner = {
-  display: 'flex',
+  display: "flex",
   minWidth: 0,
-  overflow: 'hidden'
+  overflow: "hidden",
 };
 
 const img = {
-  display: 'block',
-  width: 'auto',
-  height: '100%'
+  display: "block",
+  width: "auto",
+  height: "100%",
 };
 
-function Previews(props) {
-  const [files, setFiles] = useState([]);
-  const {getRootProps, getInputProps} = useDropzone({
-    accept: 'image/jpeg, image/png',
-    maxFiles:1,
+function Previews({ files, setFiles }) {
+  const { getRootProps, getInputProps } = useDropzone({
+    accept: "image/jpeg, image/png",
+    maxFiles: 1,
     onDrop: acceptedFiles => {
-      setFiles(acceptedFiles.map(file => Object.assign(file, {
-        preview: URL.createObjectURL(file),
-        pinblob: pintoStorage(file)
-      })));
-    }
+      setFiles(
+        acceptedFiles.map(file =>
+          Object.assign(file, {
+            preview: URL.createObjectURL(file),
+            pinblob: pintoStorage(file),
+          }),
+        ),
+      );
+    },
   });
-  
+
   const thumbs = files.map(file => (
     <div style={thumb} key={file.name}>
       <div style={thumbInner}>
-        <img
-          src={file.preview}
-          style={img}
-        />
+        <img src={file.preview} style={img} />
       </div>
     </div>
   ));
 
-  useEffect(() => () => {
-    // Make sure to revoke the data uris to avoid memory leaks
-    files.forEach(file => URL.revokeObjectURL(file.preview));
-  }, [files]);
+  useEffect(
+    () => () => {
+      // Make sure to revoke the data uris to avoid memory leaks
+      files.forEach(file => URL.revokeObjectURL(file.preview));
+    },
+    [files],
+  );
 
   return (
     <section className="container">
-      <div {...getRootProps({className: 'dropzone'})}>
+      <div {...getRootProps({ className: "dropzone" })}>
         <input {...getInputProps()} />
         <p>Drag 'n' drop some files here, or click to select files</p>
       </div>
-      <aside style={thumbsContainer}>
-        {thumbs}
-      </aside>
+      <aside style={thumbsContainer}>{thumbs}</aside>
     </section>
   );
 }
 
-<Previews />
+<Previews />;
 
 async function pintoStorage(file) {
   //var url = URL.createObjectURL(file)
- //const data = await fs.promises.readFile(`${url}`)
-  var cid = await client.storeBlob(new Blob([file]))
-  console.log(cid)
+  //const data = await fs.promises.readFile(`${url}`)
+  var cid = await client.storeBlob(new Blob([file]));
+  console.log(cid);
 
-  return (cid)
+  return cid;
 }
-const ObjectsToCsv = require('objects-to-csv');
+const ObjectsToCsv = require("objects-to-csv");
 const { ethers } = require("ethers");
 /*
     Welcome to 🏗 scaffold-eth !
@@ -276,55 +280,58 @@ function App(props) {
   const [sending, setSending] = useState();
   const [sheet, setSheet] = useState();
   const [newPurpose, setNewPurpose] = useState("loading...");
+  const [files, setFiles] = useState([]);
+  const [massDropRecepients, setMassDropRecepients] = useState([]);
 
-async function makeAList(data, userValue, userToken) {
-  //data logging is working
-  //create CSV using user inputs in form of buttons for distribution amounts or token IDs
-  const csvArray = [];
-  for (let x in data.data.items) {
-  console.log(data.data.items[x].address)
-  var obj = {
-    address: (data.data.items[x].address),
-    value: (userValue)
-}
-csvArray.push(obj)
-console.log(csvArray)
-  }
-  makethesheet(csvArray)
-}
-
-async function makeIteratedList(data, userToken) {
-  const csvArray = [];
-  const range = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
-  
-  var itList = range(1, userToken, 1);
-
-  if (itList.length > data.data.items.length) {
+  async function makeAList(data, userValue, userToken) {
+    //data logging is working
+    //create CSV using user inputs in form of buttons for distribution amounts or token IDs
+    const csvArray = [];
     for (let x in data.data.items) {
+      console.log(data.data.items[x].address);
       var obj = {
-        address: (data.data.items[x].address),
-        value: (itList[x])
+        address: data.data.items[x].address,
+        value: userValue,
+      };
+      csvArray.push(obj);
+      console.log(csvArray);
     }
-    csvArray.push(obj)
-    makethesheet(csvArray)
-}}   
-  else {
-    for (let x in itList) {
-  var obj = {
-    address: (data.data.items[x].address),
-    value: (itList[x])
-}
-csvArray.push(obj)
+    makethesheet(csvArray);
   }
-  makethesheet(csvArray)
-}}
+
+  async function makeIteratedList(data, userToken) {
+    const csvArray = [];
+    const range = (start, stop, step) => Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + i * step);
+
+    var itList = range(1, userToken, 1);
+
+    if (itList.length > data.data.items.length) {
+      for (let x in data.data.items) {
+        var obj = {
+          address: data.data.items[x].address,
+          value: itList[x],
+        };
+        csvArray.push(obj);
+        makethesheet(csvArray);
+      }
+    } else {
+      for (let x in itList) {
+        var obj = {
+          address: data.data.items[x].address,
+          value: itList[x],
+        };
+        csvArray.push(obj);
+      }
+      makethesheet(csvArray);
+    }
+  }
 
   async function makethesheet(csvArray) {
-    const csv = new ObjectsToCsv(csvArray)
-    const theSheet = await csv.toString()
-    var newSheet = theSheet.split("\n").slice(1).join("\n")
-    console.log(newSheet)
-    setSheet(newSheet)
+    const csv = new ObjectsToCsv(csvArray);
+    const theSheet = await csv.toString();
+    var newSheet = theSheet.split("\n").slice(1).join("\n");
+    console.log(newSheet);
+    setSheet(newSheet);
   }
 
   const logoutOfWeb3Modal = async () => {
@@ -592,7 +599,7 @@ csvArray.push(obj)
             >
               newNFT
             </Link>
-            </Menu.Item>
+          </Menu.Item>
           <Menu.Item key="/DistributeERC20">
             <Link
               onClick={() => {
@@ -612,7 +619,7 @@ csvArray.push(obj)
             >
               NFT_CSV
             </Link>
-            </Menu.Item>
+          </Menu.Item>
         </Menu>
 
         <Switch>
@@ -671,46 +678,83 @@ csvArray.push(obj)
             />
           </Route>
           <Route exact path="/newNFT">
-          <div style={{ paddingTop: 32, width: 740, margin: "auto" }}>
-          <Previews/>
-            <h1>Drag and drop a png/jpeg </h1>
-            <h2> {!pintoStorage} </h2>
-            <Contract
-              name="NFTDeployer"
-              signer={userSigner}
-              provider={localProvider}
-              address={address}
-              blockExplorer={blockExplorer}
-              contractConfig={contractConfig}
-            />
-            <Input
-            onChange={e => {
-              setNewPurpose(e.target.value);
-            }}
-          />
-            <Button
-            style={{ marginTop: 8 }}
-            onClick={async () => {
-              /* look how you call setPurpose on your contract: */
-              /* notice how you pass a call back for tx updates too */
-              const result = tx(
-                writeContracts.SimpleNFT.initializeSimpleNFT(newPurpose)
-              )
-                .then(result => {
-                  console.log(result);
-                  result.wait().then(receipt => {
-                    console.log(receipt);
-                    history.push(`/view/${receipt.events[receipt.events.length - 1].args._address}`);
-                  });
-                })
-                .catch(err => {
-                  //handle error here
-                  console.log(err);
-                });
-              }}
-          >
-            Set Purpose!
-          </Button>
+            <div style={{ paddingTop: 32, width: 740, margin: "auto" }}>
+              <Previews files={files} setFiles={setFiles} />
+              <h1>Drag and drop a png/jpeg </h1>
+              <h2> {!pintoStorage} </h2>
+
+              <label>Recepients</label>
+              <Input
+                placeholder='["0x00000000", "0x111111111"]'
+                value={massDropRecepients}
+                onChange={e => setMassDropRecepients(e.target.value)}
+              />
+
+              <Button
+                onClick={async () => {
+                  const result = tx(
+                    writeContracts.NFTDropper.massDrop(
+                      readContracts.NFTDeployer.address,
+                      JSON.parse(massDropRecepients),
+                      files[0].pinblob,
+                    ),
+                  )
+                    .then(result => {
+                      console.log(result);
+                      result.wait().then(receipt => {
+                        console.log(receipt);
+                      });
+                    })
+                    .catch(err => {
+                      //handle error here
+                      console.log(err);
+                    });
+                }}
+              >
+                Drop NFTS
+              </Button>
+              <Contract
+                name="NFTDeployer"
+                signer={userSigner}
+                provider={localProvider}
+                address={address}
+                blockExplorer={blockExplorer}
+                contractConfig={contractConfig}
+              />
+              <Input
+                onChange={e => {
+                  setNewPurpose(e.target.value);
+                }}
+              />
+              <Button
+                style={{ marginTop: 8 }}
+                onClick={async () => {
+                  /* look how you call setPurpose on your contract: */
+                  /* notice how you pass a call back for tx updates too */
+                  const result = tx(writeContracts.SimpleNFT.initializeSimpleNFT(newPurpose))
+                    .then(result => {
+                      console.log(result);
+                      result.wait().then(receipt => {
+                        console.log(receipt);
+                        history.push(`/view/${receipt.events[receipt.events.length - 1].args._address}`);
+                      });
+                    })
+                    .catch(err => {
+                      //handle error here
+                      console.log(err);
+                    });
+                }}
+              >
+                Set Purpose!
+              </Button>
+              <Contract
+                name="NFTDropper"
+                signer={userSigner}
+                provider={localProvider}
+                address={address}
+                blockExplorer={blockExplorer}
+                contractConfig={contractConfig}
+              />
             </div>
           </Route>
           <Route path="/Merkler">
@@ -730,10 +774,10 @@ csvArray.push(obj)
               price={price}
             />
           </Route>
-          <Route path="/DistributeERC20"> 
+          <Route path="/DistributeERC20">
             <div style={{ paddingTop: 32, width: 740, margin: "auto" }}>
-        <h1>Enter a value to send to each address</h1>
-        <Input
+              <h1>Enter a value to send to each address</h1>
+              <Input
                 style={{ margin: 16 }}
                 value={userValue}
                 placeHolder="Enter Value to mass send"
@@ -741,152 +785,134 @@ csvArray.push(obj)
                   setUserValue(e.target.value);
                 }}
               />
-        <h1>Select a Public Goods Project</h1>
-        <h2>(dont forget value up top)</h2>
+              <h1>Select a Public Goods Project</h1>
+              <h2>(dont forget value up top)</h2>
               <Button
-              style={{ margin: 16 }}
-              loading={sending}
-              size="large"
-              shape="round"
-              type="primary"
-              onClick={async () => {
-                //chain_id = 1 for ETH, 137 for Polygon/Matic, 43114 for Binance
-                // Grabs list of all holders of token / nft, so we can append a value,
-                // and make a merkle json for IPFS
-                const result = await fetch(
-                  
-                  `https://api.covalenthq.com/v1/1/tokens/0x8b13e88ead7ef8075b58c94a7eb18a89fd729b18/token_holders/?page-size=2000&key=ckey_2c198a798bdc4553b499279fe87`,
-                )
-                  .then(response => response.json())
-                  //take data and organize in CSV with Holders -> amounts or token number
-                  //Amounts will be preset buttons, placed in CSV adjacent
-                  .then(data => makeAList(data, userValue)
+                style={{ margin: 16 }}
+                loading={sending}
+                size="large"
+                shape="round"
+                type="primary"
+                onClick={async () => {
+                  //chain_id = 1 for ETH, 137 for Polygon/Matic, 43114 for Binance
+                  // Grabs list of all holders of token / nft, so we can append a value,
+                  // and make a merkle json for IPFS
+                  const result = await fetch(
+                    `https://api.covalenthq.com/v1/1/tokens/0x8b13e88ead7ef8075b58c94a7eb18a89fd729b18/token_holders/?page-size=2000&key=ckey_2c198a798bdc4553b499279fe87`,
                   )
-                }
-              }
-            >
-              Moonshot Bots
-            </Button>
-            <Button
-              style={{ margin: 16 }}
-              loading={sending}
-              size="large"
-              shape="round"
-              type="primary"
-              onClick={async () => {
-                //chain_id = 1 for ETH, 137 for Polygon/Matic, 43114 for Binance
-                // Grabs list of all holders of token / nft, so we can append a value,
-                // and make a merkle json for IPFS
-                const result = await fetch(
-                  
-                  `https://api.covalenthq.com/v1/1/tokens/0x82C7c02a52B75387DB14FA375938496cbb984388/token_holders/?page-size=2000&key=ckey_2c198a798bdc4553b499279fe87`,
-                )
-                  .then(response => response.json())
-                  //take data and organize in CSV with Holders -> amounts or token number
-                  //Amounts will be preset buttons, placed in CSV adjacent
-                  .then(data => makeAList(data, userValue)
+                    .then(response => response.json())
+                    //take data and organize in CSV with Holders -> amounts or token number
+                    //Amounts will be preset buttons, placed in CSV adjacent
+                    .then(data => makeAList(data, userValue));
+                }}
+              >
+                Moonshot Bots
+              </Button>
+              <Button
+                style={{ margin: 16 }}
+                loading={sending}
+                size="large"
+                shape="round"
+                type="primary"
+                onClick={async () => {
+                  //chain_id = 1 for ETH, 137 for Polygon/Matic, 43114 for Binance
+                  // Grabs list of all holders of token / nft, so we can append a value,
+                  // and make a merkle json for IPFS
+                  const result = await fetch(
+                    `https://api.covalenthq.com/v1/1/tokens/0x82C7c02a52B75387DB14FA375938496cbb984388/token_holders/?page-size=2000&key=ckey_2c198a798bdc4553b499279fe87`,
                   )
-                }
-              }
-            >
-              LARP(ETHBots)
-            </Button>
-            <Button
-              style={{ margin: 16 }}
-              loading={sending}
-              size="large"
-              shape="round"
-              type="primary"
-              onClick={async () => {
-                //chain_id = 1 for ETH, 137 for Polygon/Matic, 43114 for Binance
-                // Grabs list of all holders of token / nft, so we can append a value,
-                // and make a merkle json for IPFS
-                const result = await fetch(
-                  
-                  `https://api.covalenthq.com/v1/1/tokens/0x42dcba5da33cddb8202cc182a443a3e7b299dadb/token_holders/?page-size=2000&key=ckey_2c198a798bdc4553b499279fe87`,
-                )
-                  .then(response => response.json())
-                  //take data and organize in CSV with Holders -> amounts or token number
-                  //Amounts will be preset buttons, placed in CSV adjacent
-                  .then(data => makeAList(data, userValue)
+                    .then(response => response.json())
+                    //take data and organize in CSV with Holders -> amounts or token number
+                    //Amounts will be preset buttons, placed in CSV adjacent
+                    .then(data => makeAList(data, userValue));
+                }}
+              >
+                LARP(ETHBots)
+              </Button>
+              <Button
+                style={{ margin: 16 }}
+                loading={sending}
+                size="large"
+                shape="round"
+                type="primary"
+                onClick={async () => {
+                  //chain_id = 1 for ETH, 137 for Polygon/Matic, 43114 for Binance
+                  // Grabs list of all holders of token / nft, so we can append a value,
+                  // and make a merkle json for IPFS
+                  const result = await fetch(
+                    `https://api.covalenthq.com/v1/1/tokens/0x42dcba5da33cddb8202cc182a443a3e7b299dadb/token_holders/?page-size=2000&key=ckey_2c198a798bdc4553b499279fe87`,
                   )
-                }
-              }
-            >
-              LARP(Molochs)
-            </Button>
-            <Button
-              style={{ margin: 16 }}
-              loading={sending}
-              size="large"
-              shape="round"
-              type="primary"
-              onClick={async () => {
-                //chain_id = 1 for ETH, 137 for Polygon/Matic, 43114 for Binance
-                // Grabs list of all holders of token / nft, so we can append a value,
-                // and make a merkle json for IPFS
-                const result = await fetch(
-                  
-                  `https://api.covalenthq.com/v1/1/tokens/0xf5918382Dd20Ecba89747c50f80fB7f9f1e0524C/token_holders/?page-size=2000&key=ckey_2c198a798bdc4553b499279fe87`,
-                )
-                  .then(response => response.json())
-                  //take data and organize in CSV with Holders -> amounts or token number
-                  //Amounts will be preset buttons, placed in CSV adjacent
-                  .then(data => makeAList(data, userValue)
+                    .then(response => response.json())
+                    //take data and organize in CSV with Holders -> amounts or token number
+                    //Amounts will be preset buttons, placed in CSV adjacent
+                    .then(data => makeAList(data, userValue));
+                }}
+              >
+                LARP(Molochs)
+              </Button>
+              <Button
+                style={{ margin: 16 }}
+                loading={sending}
+                size="large"
+                shape="round"
+                type="primary"
+                onClick={async () => {
+                  //chain_id = 1 for ETH, 137 for Polygon/Matic, 43114 for Binance
+                  // Grabs list of all holders of token / nft, so we can append a value,
+                  // and make a merkle json for IPFS
+                  const result = await fetch(
+                    `https://api.covalenthq.com/v1/1/tokens/0xf5918382Dd20Ecba89747c50f80fB7f9f1e0524C/token_holders/?page-size=2000&key=ckey_2c198a798bdc4553b499279fe87`,
                   )
-                }
-              }
-            >
-              RainbowRolls
-            </Button>
-            <Button
-              style={{ margin: 16 }}
-              loading={sending}
-              size="large"
-              shape="round"
-              type="primary"
-              onClick={async () => {
-                //chain_id = 1 for ETH, 137 for Polygon/Matic, 43114 for Binance
-                // Grabs list of all holders of token / nft, so we can append a value,
-                // and make a merkle json for IPFS
-                const result = await fetch(
-                  
-                  `https://api.covalenthq.com/v1/1/tokens/0x711d2aC13b86BE157795B576dE4bbe6827564111/token_holders/?page-size=2000&key=ckey_2c198a798bdc4553b499279fe87`,
-                )
-                  .then(response => response.json())
-                  //take data and organize in CSV with Holders -> amounts or token number
-                  //Amounts will be preset buttons, placed in CSV adjacent
-                  .then(data => makeAList(data, userValue)
+                    .then(response => response.json())
+                    //take data and organize in CSV with Holders -> amounts or token number
+                    //Amounts will be preset buttons, placed in CSV adjacent
+                    .then(data => makeAList(data, userValue));
+                }}
+              >
+                RainbowRolls
+              </Button>
+              <Button
+                style={{ margin: 16 }}
+                loading={sending}
+                size="large"
+                shape="round"
+                type="primary"
+                onClick={async () => {
+                  //chain_id = 1 for ETH, 137 for Polygon/Matic, 43114 for Binance
+                  // Grabs list of all holders of token / nft, so we can append a value,
+                  // and make a merkle json for IPFS
+                  const result = await fetch(
+                    `https://api.covalenthq.com/v1/1/tokens/0x711d2aC13b86BE157795B576dE4bbe6827564111/token_holders/?page-size=2000&key=ckey_2c198a798bdc4553b499279fe87`,
                   )
-                }
-              }
-            >
-              Mars-Shot Bots
-            </Button>
-            <Button
-              style={{ margin: 16 }}
-              loading={sending}
-              size="large"
-              shape="round"
-              type="primary"
-              onClick={async () => {
-                //chain_id = 1 for ETH, 137 for Polygon/Matic, 43114 for Binance
-                // Grabs list of all holders of token / nft, so we can append a value,
-                // and make a merkle json for IPFS
-                const result = await fetch(
-                  
-                  `https://api.covalenthq.com/v1/1/tokens/0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03/token_holders/?page-size=2000&key=ckey_2c198a798bdc4553b499279fe87`,
-                )
-                  .then(response => response.json())
-                  //take data and organize in CSV with Holders -> amounts or token number
-                  //Amounts will be preset buttons, placed in CSV adjacent
-                  .then(data => makeAList(data, userValue)
+                    .then(response => response.json())
+                    //take data and organize in CSV with Holders -> amounts or token number
+                    //Amounts will be preset buttons, placed in CSV adjacent
+                    .then(data => makeAList(data, userValue));
+                }}
+              >
+                Mars-Shot Bots
+              </Button>
+              <Button
+                style={{ margin: 16 }}
+                loading={sending}
+                size="large"
+                shape="round"
+                type="primary"
+                onClick={async () => {
+                  //chain_id = 1 for ETH, 137 for Polygon/Matic, 43114 for Binance
+                  // Grabs list of all holders of token / nft, so we can append a value,
+                  // and make a merkle json for IPFS
+                  const result = await fetch(
+                    `https://api.covalenthq.com/v1/1/tokens/0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03/token_holders/?page-size=2000&key=ckey_2c198a798bdc4553b499279fe87`,
                   )
-                }
-              }
-            >
-              Nouns.wtf
-            </Button>
+                    .then(response => response.json())
+                    //take data and organize in CSV with Holders -> amounts or token number
+                    //Amounts will be preset buttons, placed in CSV adjacent
+                    .then(data => makeAList(data, userValue));
+                }}
+              >
+                Nouns.wtf
+              </Button>
               {/* <Form.Item
           label="Recipients and amounts"
           name="recipients"
@@ -936,9 +962,9 @@ csvArray.push(obj)
             rows={4}
           />
         </Form.Item> */}
-        <h1>Or enter any token address and submit.</h1>
+              <h1>Or enter any token address and submit.</h1>
               <Input
-              style={{ margin: 16 }}
+                style={{ margin: 16 }}
                 value={userQuery}
                 placeHolder="Enter Project Token or NFT Token Address"
                 onChange={e => {
@@ -946,52 +972,49 @@ csvArray.push(obj)
                 }}
               />
               <Button
-              style={{ margin: 16 }}
-              loading={sending}
-              size="large"
-              shape="round"
-              type="primary"
-              onClick={async () => {
-                //chain_id = 1 for ETH, 137 for Polygon/Matic, 43114 for Binance
-                // Grabs list of all holders of token / nft, so we can append a value,
-                // and make a merkle json for IPFS
-                const result = await fetch(
-                  
-                  `https://api.covalenthq.com/v1/1/tokens/${userQuery}/token_holders/?page-size=2000&key=ckey_2c198a798bdc4553b499279fe87`,
-                )
-                  .then(response => response.json())
-                  //take data and organize in CSV with Holders -> amounts or token number
-                  //Amounts will be preset buttons, placed in CSV adjacent
-                  .then(data => makeAList(data, userValue)
+                style={{ margin: 16 }}
+                loading={sending}
+                size="large"
+                shape="round"
+                type="primary"
+                onClick={async () => {
+                  //chain_id = 1 for ETH, 137 for Polygon/Matic, 43114 for Binance
+                  // Grabs list of all holders of token / nft, so we can append a value,
+                  // and make a merkle json for IPFS
+                  const result = await fetch(
+                    `https://api.covalenthq.com/v1/1/tokens/${userQuery}/token_holders/?page-size=2000&key=ckey_2c198a798bdc4553b499279fe87`,
                   )
-                }
-              }
-                    
-                    /* {const transform = data
+                    .then(response => response.json())
+                    //take data and organize in CSV with Holders -> amounts or token number
+                    //Amounts will be preset buttons, placed in CSV adjacent
+                    .then(data => makeAList(data, userValue));
+                }}
+
+                /* {const transform = data
                     for (let x in transform.length) {
                       console.log(transform[x].address)}
                     })}    }     */
-            >
-              Submit
-            </Button>
-        <h1>Copy your list below into the Merkler!</h1>
+              >
+                Submit
+              </Button>
+              <h1>Copy your list below into the Merkler!</h1>
             </div>
             <CopyBlock
-      text={sheet || 'Copy this list after submitting!'}
-      theme={dracula}
-      language='text'
-      //showLineNumbers={props.showLineNumbers}
-      //startingLineNumber={props.startingLineNumber}
-      //wrapLines
-      codeBlock
-    /> 
+              text={sheet || "Copy this list after submitting!"}
+              theme={dracula}
+              language="text"
+              //showLineNumbers={props.showLineNumbers}
+              //startingLineNumber={props.startingLineNumber}
+              //wrapLines
+              codeBlock
+            />
           </Route>
           <Route path="/DistributeNFT">
-          <div style={{ paddingTop: 32, width: 740, margin: "auto" }}>
-          <h1>Enter address and number of tokens to distribute</h1>
-          <h3>If you enter more/less tokens than there are holders, the list will truncate.</h3>
+            <div style={{ paddingTop: 32, width: 740, margin: "auto" }}>
+              <h1>Enter address and number of tokens to distribute</h1>
+              <h3>If you enter more/less tokens than there are holders, the list will truncate.</h3>
               <Input
-              style={{ margin: 16 }}
+                style={{ margin: 16 }}
                 value={userQuery2}
                 placeHolder="Enter Project Token or NFT Token Address"
                 onChange={e => {
@@ -999,7 +1022,7 @@ csvArray.push(obj)
                 }}
               />
               <Input
-              style={{ margin: 16 }}
+                style={{ margin: 16 }}
                 value={userToken}
                 placeHolder="Max Number of Mints (tokenID 1 -> x)"
                 onChange={e => {
@@ -1007,45 +1030,42 @@ csvArray.push(obj)
                 }}
               />
               <Button
-              style={{ margin: 16 }}
-              loading={sending}
-              size="large"
-              shape="round"
-              type="primary"
-              onClick={async () => {
-                //chain_id = 1 for ETH, 137 for Polygon/Matic, 43114 for Binance
-                // Grabs list of all holders of token / nft, so we can append a value,
-                // and make a merkle json for IPFS
-                const result = await fetch(
-                  
-                  `https://api.covalenthq.com/v1/1/tokens/${userQuery2}/token_holders/?page-size=2000&key=ckey_2c198a798bdc4553b499279fe87`,
-                )
-                  .then(response => response.json())
-                  //take data and organize in CSV with Holders -> amounts or token number
-                  //Amounts will be preset buttons, placed in CSV adjacent
-                  .then(data => makeIteratedList(data, userToken)
+                style={{ margin: 16 }}
+                loading={sending}
+                size="large"
+                shape="round"
+                type="primary"
+                onClick={async () => {
+                  //chain_id = 1 for ETH, 137 for Polygon/Matic, 43114 for Binance
+                  // Grabs list of all holders of token / nft, so we can append a value,
+                  // and make a merkle json for IPFS
+                  const result = await fetch(
+                    `https://api.covalenthq.com/v1/1/tokens/${userQuery2}/token_holders/?page-size=2000&key=ckey_2c198a798bdc4553b499279fe87`,
                   )
-                }
-              }
-                    
-                    /* {const transform = data
+                    .then(response => response.json())
+                    //take data and organize in CSV with Holders -> amounts or token number
+                    //Amounts will be preset buttons, placed in CSV adjacent
+                    .then(data => makeIteratedList(data, userToken));
+                }}
+
+                /* {const transform = data
                     for (let x in transform.length) {
                       console.log(transform[x].address)}
                     })}    }     */
-            >
-              Submit
-            </Button>
+              >
+                Submit
+              </Button>
             </div>
             <CopyBlock
-      text={sheet || 'Copy this list after submitting!'}
-      theme={dracula}
-      language='text'
-      //showLineNumbers={props.showLineNumbers}
-      //startingLineNumber={props.startingLineNumber}
-      //wrapLines
-      codeBlock
-    /> 
-            </Route>
+              text={sheet || "Copy this list after submitting!"}
+              theme={dracula}
+              language="text"
+              //showLineNumbers={props.showLineNumbers}
+              //startingLineNumber={props.startingLineNumber}
+              //wrapLines
+              codeBlock
+            />
+          </Route>
           <Route path="/exampleui">
             <ExampleUI
               address={address}
